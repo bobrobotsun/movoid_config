@@ -91,16 +91,16 @@ class Config:
         if get_count <= 0:
             return None
         else:
-            for i, v in enumerate(cls.__origin_list):
-                if v[2] >= param_index:
+            for i, v in enumerate(cls.__origin_param):
+                if v[1] >= param_index:
                     index_list.append(i)
-                    value_list.append(v[1])
+                    value_list.append(v[0])
                     if len(value_list) >= get_count:
                         break
             if len(value_list) < get_count:
                 raise Exception(f'param you want {get_count} is more than you left {len(value_list)}')
             for i in index_list[::-1]:
-                cls.__origin_list.pop(i)
+                cls.__origin_param.pop(i)
             if get_count == 1:
                 return value_list[0]
             else:
@@ -150,7 +150,7 @@ class Config:
             one_config_dict.setdefault('config', False)
             one_config_dict.setdefault('ask', False)
             one_config_dict.setdefault('help', '')
-            one_config_dict.setdefault('type', 'bool')
+            one_config_dict.setdefault('type', 'str')
             key_type_list = [key, one_config_dict['type']]
             if 'sub' in one_config_dict:
                 key_type_list.append(one_config_dict['sub'])
@@ -210,31 +210,33 @@ class Config:
             temp_list = str_value.split(',')
             re_list = []
             for i, v in enumerate(temp_list):
-                if sub_type == 'int':
-                    re_list[i] = int(v)
-                elif sub_type == 'float':
-                    re_list[i] = float(v)
-                elif sub_type == 'bool':
-                    re_list[i] = v.lower() not in ('f', 'n', 'false', 'no', '')
+                if v:
+                    if sub_type == 'int':
+                        re_list.append(int(v))
+                    elif sub_type == 'float':
+                        re_list.append(float(v))
+                    elif sub_type == 'bool':
+                        re_list.append(v.lower() not in ('f', 'n', 'false', 'no', ''))
             return re_list
         elif target_type == 'dict':
             temp_list = str_value.split(',')
             re_dict = {}
             for i, v in enumerate(temp_list):
-                temp_key, temp_value = v.split(':')
-                if sub_type[0] == 'int':
-                    temp_key = int(temp_key)
-                elif sub_type[0] == 'float':
-                    temp_key = float(temp_key)
-                elif sub_type[0] == 'bool':
-                    temp_key = temp_key.lower() not in ('f', 'n', 'false', 'no', '')
-                if sub_type[1] == 'int':
-                    temp_value = int(temp_value)
-                elif sub_type[1] == 'float':
-                    temp_value = float(temp_value)
-                elif sub_type[1] == 'bool':
-                    temp_value = temp_value.lower() not in ('f', 'n', 'false', 'no', '')
-                re_dict[temp_key] = temp_value
+                if ':' in v:
+                    temp_key, temp_value = v.split(':')
+                    if sub_type[0] == 'int':
+                        temp_key = int(temp_key)
+                    elif sub_type[0] == 'float':
+                        temp_key = float(temp_key)
+                    elif sub_type[0] == 'bool':
+                        temp_key = temp_key.lower() not in ('f', 'n', 'false', 'no', '')
+                    if sub_type[1] == 'int':
+                        temp_value = int(temp_value)
+                    elif sub_type[1] == 'float':
+                        temp_value = float(temp_value)
+                    elif sub_type[1] == 'bool':
+                        temp_value = temp_value.lower() not in ('f', 'n', 'false', 'no', '')
+                    re_dict[temp_key] = temp_value
             return re_dict
         elif target_type == 'enum':
             sub_type_str = [str(_) for _ in sub_type]
@@ -305,7 +307,7 @@ class Config:
                 real_type = real_list[1:]
                 param_count = self.__config_dict[real_key]['param']
                 try:
-                    get_params = self.get_param(param_index, param_count)
+                    get_params = one_param[3] if param_type == 'key' else self.get_param(param_index, param_count)
                     self.__value[real_key] = self.change_str_to_target_type(get_params, *real_type)
                 except Exception as err:
                     raise Exception(f'{param_text} need input {param_count} param but {err}')
@@ -336,7 +338,7 @@ class Config:
 
     def param_ask(self, key):
         while True:
-            input_str = input(self.__config_dict[key]['help'] + ':')
+            input_str = input(f"please input {self.__config_dict[key]['type_list']} to config [{key}]:")
             if input_str:
                 self.__value[key] = self.change_str_to_target_type(input_str, *self.__config_dict[key]['type_list'])
             else:
