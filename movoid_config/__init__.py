@@ -6,6 +6,7 @@
 # Time          : 2024/1/1 11:52
 # Description   : 
 """
+from .lib import Config
 
 if __name__ == '__main__':
     pass

@@ -1,0 +1,8 @@
+*.py[cod]
+__pycache__/
+/venv/
+/.idea/
+/build/
+/dist/
+/movoid_config.egg-info/
+*.ini
