@@ -4,6 +4,6 @@ __pycache__/
 /.idea/
 /build/
 /dist/
-/movoid_config.egg-info/
+/*.egg-info/
 /test/
 *.ini
