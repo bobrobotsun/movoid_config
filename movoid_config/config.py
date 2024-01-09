@@ -243,7 +243,12 @@ class Config:
             if str_value in sub_type_str:
                 return sub_type[sub_type_str.index(str_value)]
             else:
-                return sub_type[0]
+                try:
+                    index_value = int(str_value) % len(sub_type)
+                    return sub_type[index_value]
+                except ValueError:
+                    print(f'we do not know what is <{str_value}>, we use the first option:<{sub_type[0]}>')
+                    return sub_type[0]
         elif target_type == 'kv':
             return sub_type.get(str_value, str_value)
         elif target_type == 'json':
@@ -339,10 +344,12 @@ class Config:
     def param_ask(self, key):
         while True:
             input_str = input(f"please input {self.__config_dict[key]['type_list']} to config [{key}]:")
-            if input_str:
+            try:
                 self.__value[key] = self.change_str_to_target_type(input_str, *self.__config_dict[key]['type_list'])
-            else:
-                print('I\'m sorry, you input nothing, please input again.')
+                print(f'set <{key}> to <{self.__value[key]}>')
+                break
+            except Exception as err:
+                print(f'something wrong happened,please input again:{err}')
                 continue
 
     def config_file_read(self):
@@ -385,5 +392,5 @@ if __name__ == '__main__':
             'must': True,
             'config': True
         }
-    }, 'config.ini')
+    }, 'lib/config.ini')
     print(len(a))
