@@ -19,10 +19,10 @@ class Config:
     __origin_param = {}
     __origin_list: list = []
 
-    def __init__(self, config_dict: Dict[str, dict], config_file=None):
+    def __init__(self, _dict: Dict[str, dict], _file=None):
         Config.init()
-        self.__config_dict: Dict[str, dict] = config_dict
-        self.__config_file = config_file
+        self.__config_dict: Dict[str, dict] = _dict
+        self.__config_file = _file
         self.__config_key = None
         self.__value = {}
         self.analyse_config_dict()
@@ -107,31 +107,6 @@ class Config:
                 return value_list
 
     def analyse_config_dict(self):
-        """
-        name:
-            {
-            single:str
-            full:str
-            key:str
-            param:int(需要的param的数量)
-            config:bool
-            ini:list[str]
-            must:bool
-            ask:bool
-            help:str
-            default:???
-            type:str,int,number,float,list,dict,json,bool,enum,kv,true,false
-            sub:
-                list:<type>
-                dict:<type>:<type>
-                enum:<value>
-                kv:<key>:<value>
-            false:
-            true:
-                single:
-                full:
-            }
-        """
         self.__config_key = {
             'single': {},
             'full': {},
@@ -326,10 +301,10 @@ class Config:
 
     def param_check(self):
         for i, v in self.__config_dict.items():
-            if v['must'] and i not in self.__value:
+            if i not in self.__value:
                 if v['ask']:
                     self.param_ask(i)
-                else:
+                elif v['must']:
                     help_key = []
                     if 'single' in v:
                         help_key.append(f'-{v["single"]}')
