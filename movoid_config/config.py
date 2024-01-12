@@ -11,6 +11,7 @@ import sys
 import traceback
 from configparser import ConfigParser
 from pathlib import Path
+from tkinter import Tk, filedialog
 from typing import Dict
 
 
@@ -25,6 +26,7 @@ class Config:
         self.__config_file = _file
         self.__config_key = None
         self.__value = {}
+        self.__tk = None
         self.analyse_config_dict()
         self.analyse_all_data()
 
@@ -153,6 +155,9 @@ class Config:
                 one_config_dict.setdefault('param', 1)
                 self.__config_key['key'][one_config_dict['key']] = key_type_list
                 self.__config_key['ini'][one_config_dict['ini']] = key_type_list
+                if one_config_dict['type'] == 'file':
+                    self.__tk = Tk()
+                    self.__tk.withdraw()
             if 'single' in one_config_dict:
                 one_config_dict['single'] = str(one_config_dict['single'])[0]
                 self.__config_key['single'][one_config_dict['single']] = key_type_list
@@ -236,6 +241,15 @@ class Config:
                 sum_size *= 1024
             sum_size += temp_list[-1]
             return sum_size
+        elif target_type == 'file':
+            if str_value == '-':
+                input_file = filedialog.askopenfilename(title='choose one file to input')
+                if input_file:
+                    return str(input_file)
+                else:
+                    raise Exception(f'you do not choose any file.')
+            else:
+                return str_value
         else:
             return str_value
 
@@ -318,7 +332,11 @@ class Config:
 
     def param_ask(self, key):
         while True:
-            input_str = input(f"please input {self.__config_dict[key]['type_list']} to config [{key}]:")
+            if self.__config_dict[key]['type'] == 'file':
+                input_ask = f"please input file to config [{key}], or input - to choose file in dialog window:"
+            else:
+                input_ask = f"please input {self.__config_dict[key]['type_list']} to config [{key}]:"
+            input_str = input(input_ask)
             try:
                 self.__value[key] = self.change_str_to_target_type(input_str, *self.__config_dict[key]['type_list'])
                 print(f'set <{key}> to <{self.__value[key]}>')
