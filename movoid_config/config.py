@@ -242,7 +242,7 @@ class Config:
             sum_size += temp_list[-1]
             return sum_size
         elif target_type == 'file':
-            if str_value == '-':
+            if str_value == '':
                 input_file = filedialog.askopenfilename(title='choose one file to input')
                 if input_file:
                     return str(input_file)
@@ -333,7 +333,7 @@ class Config:
     def param_ask(self, key):
         while True:
             if self.__config_dict[key]['type'] == 'file':
-                input_ask = f"please input file to config [{key}], or input - to choose file in dialog window:"
+                input_ask = f"please input file to config [{key}], or input nothing to choose file in dialog window:"
             else:
                 input_ask = f"please input {self.__config_dict[key]['type_list']} to config [{key}]:"
             input_str = input(input_ask)
