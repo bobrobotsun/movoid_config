@@ -224,10 +224,18 @@ class Config:
                 return sub_type[sub_type_str.index(str_value)]
             else:
                 try:
-                    index_value = int(str_value) % len(sub_type)
-                    return sub_type[index_value]
+                    index_value = int(str_value)
+                    if index_value < 0:
+                        print('index is less than 0,we use the first option')
+                        return sub_type[0]
+                    elif index_value >= len(sub_type):
+                        print(f'index is more than {len(sub_type)},we use the last option')
+                        return sub_type[-1]
+                    else:
+                        print(f'we choose the index of {index_value}')
+                        return sub_type[index_value]
                 except ValueError:
-                    print(f'we do not know what is <{str_value}>, we use the first option:<{sub_type[0]}>')
+                    print(f'we do not know what is <{str_value}>, we use the first option')
                     return sub_type[0]
         elif target_type == 'kv':
             return sub_type.get(str_value, str_value)
@@ -374,6 +382,19 @@ class Config:
                     cf.set(section, option, value)
             with config_path.open(mode='w') as config_file:
                 cf.write(config_file)
+
+    def show_all(self, unset=False):
+        print('config')
+        unset_list = []
+        for key, config_dict in self.__config_dict.items():
+            if key in self.__value:
+                value = self.__value[key]
+                type_list = config_dict['type_list']
+                print(f'{key} ({config_dict["type"]}) = {self.change_target_value_to_str(value, *type_list)}')
+            else:
+                unset_list.append(key)
+        if unset:
+            print(f'<{",".join(unset_list)}> did not set yet')
 
 
 if __name__ == '__main__':
