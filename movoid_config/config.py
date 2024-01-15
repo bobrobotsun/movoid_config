@@ -225,15 +225,15 @@ class Config:
             else:
                 try:
                     index_value = int(str_value)
-                    if index_value < 0:
-                        print('index is less than 0,we use the first option')
+                    if index_value <= 0:
+                        print('index is less than 1,we use the first option')
                         return sub_type[0]
-                    elif index_value >= len(sub_type):
+                    elif index_value > len(sub_type):
                         print(f'index is more than {len(sub_type)},we use the last option')
                         return sub_type[-1]
                     else:
                         print(f'we choose the index of {index_value}')
-                        return sub_type[index_value]
+                        return sub_type[index_value - 1]
                 except ValueError:
                     print(f'we do not know what is <{str_value}>, we use the first option')
                     return sub_type[0]
@@ -342,6 +342,8 @@ class Config:
         while True:
             if self.__config_dict[key]['type'] == 'file':
                 input_ask = f"please input file to config [{key}], or input nothing to choose file in dialog window:"
+            elif self.__config_dict[key]['type'] == 'enum':
+                input_ask = f"please input (enum)[" + ', '.join([f"{i + 1}.{v}" for i, v in enumerate(self.__config_dict[key]['sub'])]) + "] to config [{key}]:"
             else:
                 input_ask = f"please input {self.__config_dict[key]['type_list']} to config [{key}]:"
             input_str = input(input_ask)
@@ -384,7 +386,7 @@ class Config:
                 cf.write(config_file)
 
     def show_all(self, unset=False):
-        print('config')
+        print(f'config value is shown as below (unset will {"not " if not unset else ""}show):')
         unset_list = []
         for key, config_dict in self.__config_dict.items():
             if key in self.__value:
