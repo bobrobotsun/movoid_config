@@ -124,7 +124,7 @@ class Config:
                 one_config_dict['ini'].insert(0, 'main')
             one_config_dict['ini'] = tuple(one_config_dict['ini'][:2])
             one_config_dict.setdefault('must', False)
-            one_config_dict.setdefault('config', False)
+            one_config_dict.setdefault('config', True)
             one_config_dict.setdefault('ask', False)
             one_config_dict.setdefault('help', '')
             one_config_dict.setdefault('type', 'str')
