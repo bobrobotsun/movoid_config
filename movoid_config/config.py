@@ -247,7 +247,7 @@ class Config:
             for i in temp_list[:-1]:
                 sum_size += int(i)
                 sum_size *= 1024
-            sum_size += temp_list[-1]
+            sum_size += int(temp_list[-1])
             return sum_size
         elif target_type == 'file':
             if str_value == '':
@@ -360,12 +360,13 @@ class Config:
             config_path = Path(self.__config_file)
             if config_path.exists():
                 cf = ConfigParser()
+                cf.read(config_path)
                 for i_section in cf.sections():
                     v_section = cf[i_section]
                     for i_option, v_option in v_section.items():
                         ini_key = (i_section, i_option)
-                        if ini_key in self.__config_key['key']:
-                            key_list = self.__config_key['key'][ini_key]
+                        if ini_key in self.__config_key['ini']:
+                            key_list = self.__config_key['ini'][ini_key]
                             real_key = key_list[0]
                             real_type = key_list[1:]
                             if self.__config_dict[real_key]['config']:
