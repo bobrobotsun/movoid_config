@@ -12,7 +12,7 @@ import traceback
 from configparser import ConfigParser
 from pathlib import Path
 from tkinter import Tk, filedialog
-from typing import Dict
+from typing import Dict, Union
 
 
 class Config:
@@ -20,21 +20,27 @@ class Config:
     __origin_param = {}
     __origin_list: list = []
 
-    def __init__(self, _dict: Dict[str, dict], _file=None):
-        Config.init()
-        self.__config_dict: Dict[str, dict] = _dict
+    def __init__(self, _dict: Union[Dict[str, dict], None] = None, _file=None):
+        Config.init_param()
+        self.__config_dict = _dict
         self.__config_file = _file
         self.__config_key = None
         self.__value = {}
         self.__tk = None
-        self.analyse_config_dict()
-        self.analyse_all_data()
+        if _dict is not None:
+            self.init(_dict)
 
     def __getitem__(self, item):
         return self.__value[item]
 
+    def __setitem__(self, item, value):
+        self.__value[item] = value
+
     def __getattr__(self, item):
         return self.__value[item]
+
+    def __setattr__(self, item, value):
+        self.__value[item] = value
 
     def __len__(self):
         return self.__value.__len__()
@@ -49,7 +55,7 @@ class Config:
         return self.__value.values()
 
     @classmethod
-    def init(cls):
+    def init_param(cls):
         if not cls.__analyse:
             try:
                 cls.__origin_param = []
@@ -107,6 +113,15 @@ class Config:
                 return value_list[0]
             else:
                 return value_list
+
+    def init(self, _dict: Dict[str, dict]):
+        self.__config_dict = _dict
+        self.analyse_config_dict()
+        self.read_file()
+        self.param_read()
+        self.param_default()
+        self.param_check()
+        self.write_file()
 
     def analyse_config_dict(self):
         self.__config_key = {
@@ -295,13 +310,6 @@ class Config:
         else:
             return str(target_value)
 
-    def analyse_all_data(self):
-        self.config_file_read()
-        self.param_read()
-        self.param_default()
-        self.param_check()
-        self.config_file_write()
-
     def param_read(self):
         for one_param in self.__origin_list:
             param_type, param_key, param_index = one_param[:3]
@@ -364,7 +372,9 @@ class Config:
                 print(f'something wrong happened,please input again:{err}')
                 continue
 
-    def config_file_read(self):
+    def read_file(self, file=None):
+        if file is not None:
+            self.__config_file = file
         if self.__config_file is not None:
             config_path = Path(self.__config_file)
             if config_path.exists():
@@ -381,7 +391,9 @@ class Config:
                             if self.__config_dict[real_key]['config']:
                                 self.__value[real_key] = self.change_str_to_target_type(v_option, *real_type)
 
-    def config_file_write(self):
+    def write_file(self, file=None):
+        if file is not None:
+            self.__config_file = file
         if self.__config_file is not None:
             config_path = Path(self.__config_file)
             cf = ConfigParser()
