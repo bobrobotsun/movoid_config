@@ -39,9 +39,6 @@ class Config:
     def __getattr__(self, item):
         return self.__value[item]
 
-    def __setattr__(self, item, value):
-        self.__value[item] = value
-
     def __len__(self):
         return self.__value.__len__()
 
