@@ -39,7 +39,3 @@ class CmdLoopRun:
 
     def start_main(self):
         pass
-
-
-if __name__ == '__main__':
-    pass
