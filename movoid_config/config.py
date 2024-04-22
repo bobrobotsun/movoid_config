@@ -23,7 +23,8 @@ class Config:
 
     def __init__(self, _dict: Union[Dict[str, dict], None] = None, _file=None):
         Config.init_param()
-        self.__config_dict = _dict
+        self.__config_dict = {}
+        self.update_rule(_dict)
         self.__config_file = _file
         self.__config_key = None
         self.__value = {}
@@ -112,8 +113,22 @@ class Config:
             else:
                 return value_list
 
-    def init(self, _dict: Dict[str, dict], _file: Union[str, None] = None):
-        self.__config_dict = _dict
+    def add_rule(self, name, type='str', *, __update=True, **kwargs):
+        if __update or name not in self.__config_dict:
+            self.__config_dict[name] = {'type': type, **kwargs}
+
+    def add_multiple_rules(self, __update=True, **kwargs):
+        kwargs = dict(kwargs) if kwargs else {}
+        for i, v in kwargs.items():
+            self.add_rule(i, __update=__update, **v)
+
+    def update_rule(self, rule_dict, __update=True):
+        rule_dict = dict(rule_dict) if rule_dict else {}
+        for i, v in rule_dict.items():
+            self.add_rule(i, __update=__update, **v)
+
+    def init(self, _dict: Dict[str, dict] = None, _file: Union[str, None] = None):
+        self.update_rule(_dict)
         self.__config_file = self.__config_file if _file is None else _file
         self.analyse_config_dict()
         self.read_file()
