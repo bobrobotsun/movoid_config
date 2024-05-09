@@ -130,6 +130,7 @@ class Config:
     def init(self, _dict: Dict[str, dict] = None, _file: Union[str, None] = None):
         self.update_rule(_dict)
         self.__config_file = self.__config_file if _file is None else _file
+        self.__value = {}
         self.analyse_config_dict()
         self.read_file()
         self.param_read()
@@ -383,7 +384,7 @@ class Config:
         elif target_type == 'files':
             title = self.__config_dict[key].get('pre_ask_text', 'choose files to input')
             input_file = filedialog.askopenfilenames(title=title)
-            return input_file
+            return ','.join(input_file)
         elif target_type == 'dir':
             title = self.__config_dict[key].get('pre_ask_text', 'choose one folder to input')
             input_file = filedialog.askdirectory(title=title)
