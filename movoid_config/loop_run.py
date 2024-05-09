@@ -25,6 +25,7 @@ class CmdLoopRun:
             try:
                 print('process started')
                 self.init_config()
+                self._config.init()
                 self.start_main()
             except Exception as err:
                 print(f'something wrong happened:{err}')

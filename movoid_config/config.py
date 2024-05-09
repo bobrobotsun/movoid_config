@@ -184,7 +184,7 @@ class Config:
                 one_config_dict.setdefault('param', 1)
                 self.__config_key['key'][one_config_dict['key']] = key_type_list
                 self.__config_key['ini'][one_config_dict['ini']] = key_type_list
-                if one_config_dict['type'] in ('file', 'dir'):
+                if one_config_dict['type'] in ('file', 'files', 'dir'):
                     self.__tk = Tk()
                     self.__tk.withdraw()
             if 'single' in one_config_dict:
@@ -285,6 +285,16 @@ class Config:
                 return str(str_value)
             else:
                 raise Exception(f'{str_value} is not a file.')
+        elif target_type == 'files':
+            if str_value == '':
+                return []
+            else:
+                temp_list = str_value.split(',')
+                path_list = [pathlib.Path(_).is_file() for _ in temp_list]
+                if all(path_list):
+                    return temp_list
+                else:
+                    raise Exception(f'{[_v for _i, _v in enumerate(temp_list) if not path_list[_i]]} is not a file.')
         elif target_type == 'dir':
             if str_value == '':
                 return str_value
@@ -297,7 +307,7 @@ class Config:
 
     @staticmethod
     def change_target_value_to_str(target_value, target_type, sub_type=None):
-        if target_type == 'list':
+        if target_type in ('list', 'files'):
             return ','.join([str(_) for _ in target_value])
         elif target_type == 'dict':
             return ','.join([f'{k}:{v}' for k, v in target_value.items()])
@@ -370,6 +380,10 @@ class Config:
             title = self.__config_dict[key].get('pre_ask_text', 'choose one file to input')
             input_file = filedialog.askopenfilename(title=title)
             return str(input_file)
+        elif target_type == 'files':
+            title = self.__config_dict[key].get('pre_ask_text', 'choose files to input')
+            input_file = filedialog.askopenfilenames(title=title)
+            return input_file
         elif target_type == 'dir':
             title = self.__config_dict[key].get('pre_ask_text', 'choose one folder to input')
             input_file = filedialog.askdirectory(title=title)
@@ -381,7 +395,7 @@ class Config:
             if pre_input:
                 input_str = pre_input
             else:
-                if self.__config_dict[key]['type'] in ('file', 'dir'):
+                if self.__config_dict[key]['type'] in ('file', 'files', 'dir'):
                     input_ask = f"please input path to config [{key}], or input nothing to choose in dialog window:"
                 elif self.__config_dict[key]['type'] == 'enum':
                     input_ask = f"please input (enum)[" + ', '.join([f"{i + 1}.{v}" for i, v in enumerate(self.__config_dict[key]['sub'])]) + "] to config [{key}]:"
