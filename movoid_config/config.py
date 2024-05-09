@@ -21,17 +21,16 @@ class Config:
     __origin_param = {}
     __origin_list: list = []
 
-    def __init__(self, _dict: Union[Dict[str, dict], None] = None, _file=None, _init=False):
+    def __init__(self, _dict: Union[Dict[str, dict], None] = None, _file=None):
         Config.init_param()
         self.__config_dict = {}
-        self.__config_file = None
-        self.reset_rule(_dict)
-        self.reset_file(_file)
+        self.update_rule(_dict)
+        self.__config_file = _file
         self.__config_key = None
         self.__value = {}
         self.__tk = None
-        if _init:
-            self.init()
+        if _dict is not None:
+            self.init(_dict, _file)
 
     def __getitem__(self, item):
         return self.__value[item]
@@ -114,27 +113,23 @@ class Config:
             else:
                 return value_list
 
-    def reset_rule(self, _dict: Dict[str, dict]):
-        self.__config_dict = {} if _dict else _dict
+    def add_rule(self, name, type='str', *, __update=True, **kwargs):
+        if __update or name not in self.__config_dict:
+            self.__config_dict[name] = {'type': type, **kwargs}
 
-    def add_rule(self, name, **kwargs):
-        """
-        add a new rule for config. if "name" already existed, this will cover the old rule.
-        :param name: config key. you can use config.name to use it
-        :param kwargs: a dict
-            :key type:default is str. you can input these
-        :return:
-        """
-        self.__config_dict[name] = kwargs
+    def add_multiple_rules(self, __update=True, **kwargs):
+        kwargs = dict(kwargs) if kwargs else {}
+        for i, v in kwargs.items():
+            self.add_rule(i, __update=__update, **v)
 
-    def delete_rule(self, name):
-        if name in self.__config_dict:
-            self.__config_dict.pop(name)
+    def update_rule(self, rule_dict, __update=True):
+        rule_dict = dict(rule_dict) if rule_dict else {}
+        for i, v in rule_dict.items():
+            self.add_rule(i, __update=__update, **v)
 
-    def reset_file(self, _file: Union[str, None] = None):
-        self.__config_file = _file
-
-    def init(self):
+    def init(self, _dict: Dict[str, dict] = None, _file: Union[str, None] = None):
+        self.update_rule(_dict)
+        self.__config_file = self.__config_file if _file is None else _file
         self.analyse_config_dict()
         self.read_file()
         self.param_read()
