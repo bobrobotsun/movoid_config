@@ -32,6 +32,14 @@ class Config:
         if _dict is not None:
             self.init(_dict, _file)
 
+    @property
+    def file(self):
+        return self.__config_file
+
+    @file.setter
+    def file(self, value):
+        self.__config_file = value
+
     def __getitem__(self, item):
         return self.__value[item]
 
