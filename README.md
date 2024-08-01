@@ -1,5 +1,5 @@
 This is a simple program for developer to create a param-config reader.
-It only need config_dict and config_file_name to analyse all param and config
+It only needs config_dict and config_file_name to analyse all param and config
 
 for example,your py file main.py is
 
@@ -69,4 +69,4 @@ for v in config.values():
 ```
 to traversal loop
 
-if you use when you do not input an error will be raised like use an unknown key in a dict.
+If you use when you do not input. An error will be raised like use an unknown key in a dict.

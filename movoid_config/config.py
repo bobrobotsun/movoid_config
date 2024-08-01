@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 # File          : config
-# Author        : Sun YiFan-Movoid
+# Author        : Sun YiFan-movoid
 # Time          : 2024/1/1 12:27
 # Description   : 
 """
@@ -121,16 +121,16 @@ class Config:
             else:
                 return value_list
 
-    def add_rule(self, name, type='str', *, __update=True, **kwargs):
+    def add_rule(self, name, _type='str', *, __update=True, **kwargs):
         if __update or name not in self.__config_dict:
-            self.__config_dict[name] = {'type': type, **kwargs}
+            self.__config_dict[name] = {'type': _type, **kwargs}
 
     def add_multiple_rules(self, __update=True, **kwargs):
         kwargs = dict(kwargs) if kwargs else {}
         for i, v in kwargs.items():
             self.add_rule(i, __update=__update, **v)
 
-    def update_rule(self, rule_dict, __update=True):
+    def update_rule(self, rule_dict: Dict[str, dict], __update=True):
         rule_dict = dict(rule_dict) if rule_dict else {}
         for i, v in rule_dict.items():
             self.add_rule(i, __update=__update, **v)
