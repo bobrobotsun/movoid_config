@@ -22,6 +22,25 @@ class Config:
     __origin_list: list = []
 
     def __init__(self, _dict: Union[Dict[str, dict], None] = None, _file=None):
+        """
+        可以直接设置参数类型
+        :param _dict:
+            key:参数名称，可以以属性形式调用，或者键值的方式调用
+            value:
+                type:类型，默认str，可以输入
+                default
+                single
+                full
+                key
+                ini
+                config
+                must
+                ask
+                help
+                false
+                sub
+        :param _file:
+        """
         Config.init_param()
         self.__config_dict = {}
         self.update_rule(_dict)
@@ -174,19 +193,23 @@ class Config:
             if one_config_dict['type'] in ('f', 'n', 'false', 'no'):
                 one_config_dict['type'] = 'false'
                 one_config_dict.setdefault('param', 0)
-                if 'single' in one_config_dict['true']:
-                    self.__config_key['single'][one_config_dict['true']['single']] = [key, 'true']
-                if 'full' in one_config_dict['true']:
-                    self.__config_key['full'][one_config_dict['true']['full']] = [key, 'true']
+                one_config_dict.setdefault('default', False)
+                if 'true' in one_config_dict:
+                    if 'single' in one_config_dict['true']:
+                        self.__config_key['single'][one_config_dict['true']['single']] = [key, 'true']
+                    if 'full' in one_config_dict['true']:
+                        self.__config_key['full'][one_config_dict['true']['full']] = [key, 'true']
                 self.__config_key['key'][one_config_dict['key']] = [key, 'bool']
                 self.__config_key['ini'][one_config_dict['ini']] = [key, 'bool']
             elif one_config_dict['type'] in ('t', 'y', 'true', 'yes'):
                 one_config_dict['type'] = 'true'
                 one_config_dict.setdefault('param', 0)
-                if 'single' in one_config_dict['false']:
-                    self.__config_key['single'][one_config_dict['false']['single']] = [key, 'false']
-                if 'full' in one_config_dict['false']:
-                    self.__config_key['full'][one_config_dict['false']['full']] = [key, 'false']
+                one_config_dict.setdefault('default', True)
+                if 'false' in one_config_dict:
+                    if 'single' in one_config_dict['false']:
+                        self.__config_key['single'][one_config_dict['false']['single']] = [key, 'false']
+                    if 'full' in one_config_dict['false']:
+                        self.__config_key['full'][one_config_dict['false']['full']] = [key, 'false']
                 self.__config_key['key'][one_config_dict['key']] = [key, 'bool']
                 self.__config_key['ini'][one_config_dict['ini']] = [key, 'bool']
             else:

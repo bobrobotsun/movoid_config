@@ -12,6 +12,13 @@ config = Config({
         "must": True,  # whether you must input it ,or it will raise exception
         "ask": True,  # when you do not input,you can change to ask user to input it
         "help": "This is param which is an example.",  # show it in help text.(not done yet)
-    }
-}, 'config.ini')
-print(config.param)
+    },
+    "check": {
+        "type": "true",
+        "false": {
+            "single": "f",
+            "full": "false"
+        },
+    },
+}, )
+print(config.check)
