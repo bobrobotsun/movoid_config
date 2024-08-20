@@ -28,18 +28,20 @@ class Config:
             key:参数名称，可以以属性形式调用，或者键值的方式调用
             value:
                 type:类型，默认str，可以输入
-                default
-                single
-                full
-                key
-                ini
-                config
-                must
-                ask
-                help
-                false
-                sub
-        :param _file:
+                default：默认值
+                single：命令行中单杠单字母，例如输入 -t xx 来决定输入参数
+                full：命令行中双杠单词，例如输入 -test xxx 来决定输入参数
+                key：命令行中以key-value的模式输入，例如输入 test=value 来决定输入参数
+                ini：在配置文件中的路径，一般输入两个字符串，例如输入 main test 来决定在ini文件中的路径输入
+                config：是否要从config读取，是否要写入config文件，默认True
+                must：该参数是否必须有值。如果没有值会报错。默认True
+                ask：如果must的情况下，是否会在无值时向用户询问，仅命令行时生效
+                help：在帮助文档中的显示文本。
+                false：如果类型是True时，可以在这里输入参数类型，在命令行中输入了这些命令后，会把该值设置为False
+                true：如果类型是False时，可以在这里输入参数类型，在命令行中输入了这些命令后，会把该值设置为True
+                sub：子类型，针对enum、kv等类型，用于确定这些类型下的取值范围
+        :param _file:文件目录，如果不写就不会尝试读写配置文件
+        :param _file_write:是否自动写入文件
         """
         Config.init_param()
         self._config_dict = {}
