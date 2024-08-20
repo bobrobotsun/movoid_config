@@ -1,5 +1,5 @@
 This is a simple program for developer to create a param-config reader.
-It only need config_dict and config_file_name to analyse all param and config
+It only needs config_dict and config_file_name to analyse all param and config
 
 for example,your py file main.py is
 
@@ -14,7 +14,7 @@ config = Config({
         "full": "param",  # use like --param *
         "key": "param",  # use like param=?
         "ini": ["main", "param"],  # use in config.ini
-        "config": "True",  # whether try to find and write in .ini file
+        "config": True,  # whether try to find and write in .ini file
         "must": True,  # whether you must input it ,or it will raise exception
         "ask": True,  # when you do not input,you can change to ask user to input it
         "help": "This is param which is an example.",  # show it in help text.(not done yet)
@@ -69,4 +69,4 @@ for v in config.values():
 ```
 to traversal loop
 
-if you use when you do not input an error will be raised like use an unknown key in a dict.
+If you use when you do not input. An error will be raised like use an unknown key in a dict.
