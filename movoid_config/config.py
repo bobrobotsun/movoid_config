@@ -17,11 +17,11 @@ from typing import Dict, Union
 
 
 class Config:
-    __analyse: bool = False
-    __origin_param = {}
-    __origin_list: list = []
+    _analyse: bool = False
+    _origin_param = {}
+    _origin_list: list = []
 
-    def __init__(self, _dict: Union[Dict[str, dict], None] = None, _file=None):
+    def __init__(self, _dict: Union[Dict[str, dict], None] = None, _file=None, _file_write=True):
         """
         可以直接设置参数类型
         :param _dict:
@@ -42,79 +42,80 @@ class Config:
         :param _file:
         """
         Config.init_param()
-        self.__config_dict = {}
+        self._config_dict = {}
         self.update_rule(_dict)
-        self.__config_file = _file
-        self.__config_key = None
-        self.__value = {}
-        self.__tk = None
+        self._config_file = _file
+        self._config_key = None
+        self._config_file_write = bool(_file_write)
+        self._value = {}
+        self._tk = None
         if _dict is not None:
             self.init(_dict, _file)
 
     @property
     def file(self):
-        return self.__config_file
+        return self._config_file
 
     @file.setter
     def file(self, value):
-        self.__config_file = value
+        self._config_file = value
 
     def __getitem__(self, item):
-        return self.__value[item]
+        return self._value[item]
 
     def __setitem__(self, item, value):
-        self.__value[item] = value
+        self._value[item] = value
 
     def __getattr__(self, item):
-        return self.__value[item]
+        return self._value[item]
 
     def __len__(self):
-        return self.__value.__len__()
+        return self._value.__len__()
 
     def items(self):
-        return self.__value.items()
+        return self._value.items()
 
     def keys(self):
-        return self.__value.keys()
+        return self._value.keys()
 
     def values(self):
-        return self.__value.values()
+        return self._value.values()
 
     @classmethod
     def init_param(cls):
-        if not cls.__analyse:
+        if not cls._analyse:
             try:
-                cls.__origin_param = []
-                cls.__origin_list = []
+                cls._origin_param = []
+                cls._origin_list = []
                 for arg_i, arg_v in enumerate(sys.argv[1:]):
                     if arg_v.startswith('--'):
                         real_argv = arg_v[2:]
                         if real_argv == '':
                             print('please do not input empty config "--",we will ignore it.', file=sys.stderr)
                         else:
-                            cls.__origin_list.append(['full', real_argv, arg_i])
+                            cls._origin_list.append(['full', real_argv, arg_i])
                     elif arg_v.startswith('-'):
                         real_argv_list = arg_v[1:]
                         if real_argv_list == '':
                             print('please do not input empty config "-",we will ignore it.', file=sys.stderr)
                         else:
                             for real_argv in real_argv_list:
-                                cls.__origin_list.append(['single', real_argv, arg_i])
+                                cls._origin_list.append(['single', real_argv, arg_i])
                     elif '=' in arg_v:
                         real_arg_key, real_arg_value = arg_v.split('=', 1)
                         if real_arg_key == '':
                             print('please do not input empty config "=*",we will ignore it.', file=sys.stderr)
                         else:
-                            cls.__origin_list.append(['key', real_arg_key, arg_i, real_arg_value])
+                            cls._origin_list.append(['key', real_arg_key, arg_i, real_arg_value])
                     else:
                         real_argv = arg_v
-                        cls.__origin_param.append([real_argv, arg_i])
+                        cls._origin_param.append([real_argv, arg_i])
             except Exception as err:
                 print(f'we fail to analyse args you input:{err}')
                 traceback.print_exc()
-                __analyse = False
+                cls._analyse = False
             else:
-                __analyse = True
+                cls._analyse = True
 
     @classmethod
     def get_param(cls, param_index=0, get_count=1):
@@ -125,7 +126,7 @@ class Config:
         if get_count <= 0:
             return None
         else:
-            for i, v in enumerate(cls.__origin_param):
+            for i, v in enumerate(cls._origin_param):
                 if v[1] >= param_index:
                     index_list.append(i)
                     value_list.append(v[0])
@@ -134,45 +135,46 @@ class Config:
             if len(value_list) < get_count:
                 raise Exception(f'param you want {get_count} is more than you left {len(value_list)}')
             for i in index_list[::-1]:
-                cls.__origin_param.pop(i)
+                cls._origin_param.pop(i)
             if get_count == 1:
                 return value_list[0]
             else:
                 return value_list
 
-    def add_rule(self, name, _type='str', *, __update=True, **kwargs):
-        if __update or name not in self.__config_dict:
-            self.__config_dict[name] = {'type': _type, **kwargs}
+    def add_rule(self, name, _type='str', *, _update=True, **kwargs):
+        if _update or name not in self._config_dict:
+            self._config_dict[name] = {'type': _type, **kwargs}
 
-    def add_multiple_rules(self, __update=True, **kwargs):
+    def add_multiple_rules(self, _update=True, **kwargs):
         kwargs = dict(kwargs) if kwargs else {}
         for i, v in kwargs.items():
-            self.add_rule(i, __update=__update, **v)
+            self.add_rule(i, _update=_update, **v)
 
-    def update_rule(self, rule_dict: Dict[str, dict], __update=True):
+    def update_rule(self, rule_dict: Dict[str, dict], _update=True):
         rule_dict = dict(rule_dict) if rule_dict else {}
         for i, v in rule_dict.items():
-            self.add_rule(i, __update=__update, **v)
+            self.add_rule(i, _update=_update, **v)
 
     def init(self, _dict: Dict[str, dict] = None, _file: Union[str, None] = None):
         self.update_rule(_dict)
-        self.__config_file = self.__config_file if _file is None else _file
-        self.__value = {}
+        self._config_file = self._config_file if _file is None else _file
+        self._value = {}
         self.analyse_config_dict()
         self.read_file()
         self.param_read()
         self.param_default()
         self.param_check()
-        self.write_file()
+        if self._config_file_write:
+            self.write_file()
 
     def analyse_config_dict(self):
-        self.__config_key = {
+        self._config_key = {
             'single': {},
             'full': {},
             'key': {},
             'ini': {}
         }
-        for key, one_config_dict in self.__config_dict.items():
+        for key, one_config_dict in self._config_dict.items():
             one_config_dict.setdefault('key', key)
             one_config_dict.setdefault('ini', ['main', key])
             if len(one_config_dict['ini']) == 0:
@@ -196,35 +198,35 @@ class Config:
                 one_config_dict.setdefault('default', False)
                 if 'true' in one_config_dict:
                     if 'single' in one_config_dict['true']:
-                        self.__config_key['single'][one_config_dict['true']['single']] = [key, 'true']
+                        self._config_key['single'][one_config_dict['true']['single']] = [key, 'true']
                     if 'full' in one_config_dict['true']:
-                        self.__config_key['full'][one_config_dict['true']['full']] = [key, 'true']
-                self.__config_key['key'][one_config_dict['key']] = [key, 'bool']
-                self.__config_key['ini'][one_config_dict['ini']] = [key, 'bool']
+                        self._config_key['full'][one_config_dict['true']['full']] = [key, 'true']
+                self._config_key['key'][one_config_dict['key']] = [key, 'bool']
+                self._config_key['ini'][one_config_dict['ini']] = [key, 'bool']
             elif one_config_dict['type'] in ('t', 'y', 'true', 'yes'):
                 one_config_dict['type'] = 'true'
                 one_config_dict.setdefault('param', 0)
                 one_config_dict.setdefault('default', True)
                 if 'false' in one_config_dict:
                     if 'single' in one_config_dict['false']:
-                        self.__config_key['single'][one_config_dict['false']['single']] = [key, 'false']
+                        self._config_key['single'][one_config_dict['false']['single']] = [key, 'false']
                     if 'full' in one_config_dict['false']:
-                        self.__config_key['full'][one_config_dict['false']['full']] = [key, 'false']
-                self.__config_key['key'][one_config_dict['key']] = [key, 'bool']
-                self.__config_key['ini'][one_config_dict['ini']] = [key, 'bool']
+                        self._config_key['full'][one_config_dict['false']['full']] = [key, 'false']
+                self._config_key['key'][one_config_dict['key']] = [key, 'bool']
+                self._config_key['ini'][one_config_dict['ini']] = [key, 'bool']
             else:
                 one_config_dict.setdefault('param', 1)
-                self.__config_key['key'][one_config_dict['key']] = key_type_list
-                self.__config_key['ini'][one_config_dict['ini']] = key_type_list
+                self._config_key['key'][one_config_dict['key']] = key_type_list
+                self._config_key['ini'][one_config_dict['ini']] = key_type_list
                 if one_config_dict['type'] in ('file', 'files', 'dir'):
-                    self.__tk = Tk()
-                    self.__tk.withdraw()
+                    self._tk = Tk()
+                    self._tk.withdraw()
             if 'single' in one_config_dict:
                 one_config_dict['single'] = str(one_config_dict['single'])[0]
-                self.__config_key['single'][one_config_dict['single']] = key_type_list
+                self._config_key['single'][one_config_dict['single']] = key_type_list
             if 'full' in one_config_dict:
                 one_config_dict['full'] = str(one_config_dict['full'])
-                self.__config_key['full'][one_config_dict['full']] = key_type_list
+                self._config_key['full'][one_config_dict['full']] = key_type_list
 
     @staticmethod
     def change_str_to_target_type(str_value: str, target_type, sub_type=None):
@@ -363,7 +365,7 @@ class Config:
             return str(target_value)
 
     def param_read(self):
-        for one_param in self.__origin_list:
+        for one_param in self._origin_list:
             param_type, param_key, param_index = one_param[:3]
             param_text = ''
             if param_type == 'single':
@@ -372,27 +374,27 @@ class Config:
                 param_text = f'--{param_key}'
             elif param_type == 'key':
                 param_text = f'{param_key}={one_param[3]}'
-            if param_key in self.__config_key[param_type]:
-                real_list = self.__config_key[param_type][param_key]
+            if param_key in self._config_key[param_type]:
+                real_list = self._config_key[param_type][param_key]
                 real_key = real_list[0]
                 real_type = real_list[1:]
-                param_count = self.__config_dict[real_key]['param']
+                param_count = self._config_dict[real_key]['param']
                 try:
                     get_params = one_param[3] if param_type == 'key' else self.get_param(param_index, param_count)
-                    self.__value[real_key] = self.change_str_to_target_type(get_params, *real_type)
+                    self._value[real_key] = self.change_str_to_target_type(get_params, *real_type)
                 except Exception as err:
                     raise Exception(f'{param_text} need input {param_count} param but {err}')
             else:
                 print(f'we do not know what is [{param_text}] at {param_index} of argv', file=sys.stderr)
 
     def param_default(self):
-        for i, v in self.__config_dict.items():
-            if i not in self.__value and 'default' in v:
-                self.__value[i] = v['default']
+        for i, v in self._config_dict.items():
+            if i not in self._value and 'default' in v:
+                self._value[i] = v['default']
 
     def param_check(self):
-        for i, v in self.__config_dict.items():
-            if i not in self.__value:
+        for i, v in self._config_dict.items():
+            if i not in self._value:
                 if v['ask']:
                     self.param_ask(i)
                 elif v['must']:
@@ -409,34 +411,34 @@ class Config:
 
     def param_pre_ask(self, key, target_type, sub_type=None):
         if target_type == 'file':
-            title = self.__config_dict[key].get('pre_ask_text', 'choose one file to input')
+            title = self._config_dict[key].get('pre_ask_text', 'choose one file to input')
             input_file = filedialog.askopenfilename(title=title)
             return str(input_file)
         elif target_type == 'files':
-            title = self.__config_dict[key].get('pre_ask_text', 'choose files to input')
+            title = self._config_dict[key].get('pre_ask_text', 'choose files to input')
             input_file = filedialog.askopenfilenames(title=title)
             return ','.join(input_file)
         elif target_type == 'dir':
-            title = self.__config_dict[key].get('pre_ask_text', 'choose one folder to input')
+            title = self._config_dict[key].get('pre_ask_text', 'choose one folder to input')
             input_file = filedialog.askdirectory(title=title)
             return str(input_file)
 
     def param_ask(self, key):
         while True:
-            pre_input = self.param_pre_ask(key, *self.__config_dict[key]['type_list'])
+            pre_input = self.param_pre_ask(key, *self._config_dict[key]['type_list'])
             if pre_input:
                 input_str = pre_input
             else:
-                if self.__config_dict[key]['type'] in ('file', 'files', 'dir'):
+                if self._config_dict[key]['type'] in ('file', 'files', 'dir'):
                     input_ask = f"please input path to config [{key}], or input nothing to choose in dialog window:"
-                elif self.__config_dict[key]['type'] == 'enum':
-                    input_ask = f"please input (enum)[" + ', '.join([f"{i + 1}.{v}" for i, v in enumerate(self.__config_dict[key]['sub'])]) + "] to config [{key}]:"
+                elif self._config_dict[key]['type'] == 'enum':
+                    input_ask = f"please input (enum)[" + ', '.join([f"{i + 1}.{v}" for i, v in enumerate(self._config_dict[key]['sub'])]) + "] to config [{key}]:"
                 else:
-                    input_ask = f"please input {self.__config_dict[key]['type_list']} to config [{key}]:"
-                input_str = input(self.__config_dict[key].get('ask_text', input_ask))
+                    input_ask = f"please input {self._config_dict[key]['type_list']} to config [{key}]:"
+                input_str = input(self._config_dict[key].get('ask_text', input_ask))
             try:
-                self.__value[key] = self.change_str_to_target_type(input_str, *self.__config_dict[key]['type_list'])
-                print(f'set <{key}> to <{self.__value[key]}>')
+                self._value[key] = self.change_str_to_target_type(input_str, *self._config_dict[key]['type_list'])
+                print(f'set <{key}> to <{self._value[key]}>')
                 break
             except Exception as err:
                 print(f'something wrong happened,please input again:{err}')
@@ -444,9 +446,9 @@ class Config:
 
     def read_file(self, file=None):
         if file is not None:
-            self.__config_file = file
-        if self.__config_file is not None:
-            config_path = Path(self.__config_file)
+            self._config_file = file
+        if self._config_file is not None:
+            config_path = Path(self._config_file)
             if config_path.exists():
                 cf = ConfigParser()
                 cf.read(config_path)
@@ -454,23 +456,23 @@ class Config:
                     v_section = cf[i_section]
                     for i_option, v_option in v_section.items():
                         ini_key = (i_section, i_option)
-                        if ini_key in self.__config_key['ini']:
-                            key_list = self.__config_key['ini'][ini_key]
+                        if ini_key in self._config_key['ini']:
+                            key_list = self._config_key['ini'][ini_key]
                             real_key = key_list[0]
                             real_type = key_list[1:]
-                            if self.__config_dict[real_key]['config']:
-                                self.__value[real_key] = self.change_str_to_target_type(v_option, *real_type)
+                            if self._config_dict[real_key]['config']:
+                                self._value[real_key] = self.change_str_to_target_type(v_option, *real_type)
 
     def write_file(self, file=None):
         if file is not None:
-            self.__config_file = file
-        if self.__config_file is not None:
-            config_path = Path(self.__config_file)
+            self._config_file = file
+        if self._config_file is not None:
+            config_path = Path(self._config_file)
             cf = ConfigParser()
-            for i, v in self.__value.items():
-                if self.__config_dict[i]['config']:
-                    section, option = self.__config_dict[i]['ini']
-                    value = self.change_target_value_to_str(v, *self.__config_dict[i]['type_list'])
+            for i, v in self._value.items():
+                if self._config_dict[i]['config']:
+                    section, option = self._config_dict[i]['ini']
+                    value = self.change_target_value_to_str(v, *self._config_dict[i]['type_list'])
                     if not cf.has_section(section):
                         cf.add_section(section)
                     cf.set(section, option, value)
@@ -480,9 +482,9 @@ class Config:
     def show_all(self, unset=False):
         print(f'config value is shown as below (unset will {"not " if not unset else ""}show):')
         unset_list = []
-        for key, config_dict in self.__config_dict.items():
-            if key in self.__value:
-                value = self.__value[key]
+        for key, config_dict in self._config_dict.items():
+            if key in self._value:
+                value = self._value[key]
                 type_list = config_dict['type_list']
                 print(f'{key} ({config_dict["type"]}) = {self.change_target_value_to_str(value, *type_list)}')
             else:
