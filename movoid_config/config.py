@@ -157,9 +157,10 @@ class Config:
         for i, v in rule_dict.items():
             self.add_rule(i, _update=_update, **v)
 
-    def init(self, _dict: Dict[str, dict] = None, _file: Union[str, None] = None):
+    def init(self, _dict: Dict[str, dict] = None, _file: Union[str, None] = None, _file_write: Union[bool, None] = None):
         self.update_rule(_dict)
         self._config_file = self._config_file if _file is None else _file
+        self._config_file_write = self._config_file_write if _file_write is None else bool(_file_write)
         self._value = {}
         self.analyse_config_dict()
         self.read_file()
