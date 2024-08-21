@@ -387,8 +387,6 @@ class Config:
                     self._value[real_key] = self.change_str_to_target_type(get_params, *real_type)
                 except Exception as err:
                     raise Exception(f'{param_text} need input {param_count} param but {err}')
-            else:
-                print(f'we do not know what is [{param_text}] at {param_index} of argv', file=sys.stderr)
 
     def param_default(self):
         for i, v in self._config_dict.items():
