@@ -180,10 +180,12 @@ class Config:
         for key, one_config_dict in self._config_dict.items():
             one_config_dict.setdefault('key', key)
             one_config_dict.setdefault('ini', ['main', key])
+            if isinstance(one_config_dict['ini'], str):
+                one_config_dict['ini'] = [one_config_dict['ini']]
             if len(one_config_dict['ini']) == 0:
-                one_config_dict['ini'].insert(0, key)
+                one_config_dict['ini'].append('main')
             if len(one_config_dict['ini']) == 1:
-                one_config_dict['ini'].insert(0, 'main')
+                one_config_dict['ini'].append(key)
             one_config_dict['ini'] = tuple(one_config_dict['ini'][:2])
             one_config_dict.setdefault('must', False)
             one_config_dict.setdefault('config', True)
