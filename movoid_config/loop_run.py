@@ -31,19 +31,18 @@ class CmdLoopRun:
                 print(f'something wrong happened:{err}')
                 traceback.print_exc()
                 self.start_exception()
-            finally:
-                self.start_end()
-                try:
-                    input_str = input('process ended.you can input nothing to exit,or input anything to rerun it:')
-                except:  # noqa
+            self.start_end()
+            try:
+                input_str = input('process ended.you can input nothing to exit,or input anything to rerun it:')
+            except:  # noqa
+                self.start_exit()
+                break
+            else:
+                if input_str:
+                    continue
+                else:
                     self.start_exit()
                     break
-                else:
-                    if input_str:
-                        continue
-                    else:
-                        self.start_exit()
-                        break
 
     def start_main(self):
         pass

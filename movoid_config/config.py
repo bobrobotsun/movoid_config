@@ -246,8 +246,7 @@ class Config:
                     re_value = int(str_value)
             except ValueError:
                 re_value = float(str_value)
-            finally:
-                return re_value
+            return re_value
         elif target_type == 'bool':
             return str_value.lower() not in ('f', 'n', 'false', 'no', '')
         elif target_type == 'true':
